@@ -597,8 +597,9 @@ async function generate() {
         blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
 
       } else {
-        // Phaya — Nano Banana 2
-        const resp = await fetch('https://api.phaya.io/api/v1/nano-banana/create', {
+        // Phaya — Nano Banana 2 (via CORS proxy)
+        const phayaUrl = 'https://api.phaya.io/api/v1/nano-banana/create';
+        const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(phayaUrl), {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt, aspect_ratio: ar, resolution: '1K', output_format: 'jpg' })
