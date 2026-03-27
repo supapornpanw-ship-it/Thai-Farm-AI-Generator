@@ -281,7 +281,7 @@
   <span style="font-size:24px">🌾</span>
   <div>
     <h1>Thai Farm AI Generator</h1>
-    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / Imagen 3</p>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / Gemini Flash</p>
   </div>
   <span class="free-badge">✨ OpenAI · Gemini</span>
 </header>
@@ -302,7 +302,7 @@
         </button>
         <button id="btnGemini" onclick="setProvider('gemini')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
-          Imagen 3
+          Gemini Flash
         </button>
       </div>
 
@@ -329,7 +329,7 @@
             style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
         </div>
         <div id="statusGemini" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Key</div>
-        <div style="font-size:10px;color:#445533;margin-top:4px">ฟรี 15 ภาพ/นาที • Imagen 3</div>
+        <div style="font-size:10px;color:#445533;margin-top:4px">ฟรี • Gemini 2.0 Flash Image Gen</div>
       </div>
     </div>
 
@@ -428,12 +428,12 @@
 
 <script>
 const THEMES = {
-  garden:  'A beautiful Thai organic vegetable garden, neatly arranged raised wooden planting beds filled with lush green vegetables, a serene lotus fish pond in the center, bamboo fences, banana and coconut trees, rustic wooden farmhouse in background, misty green mountains, hyperrealistic photographic quality',
-  house:   'A picturesque traditional Thai wooden stilt house surrounded by lush green rice paddies, vegetable garden with crop rows, coconut and banana trees, peaceful canal nearby, warm tropical landscape, locals in daily life, cinematic aerial perspective, photorealistic',
-  kitchen: 'Authentic Thai countryside outdoor kitchen under rustic wooden shelter, woman cooking over traditional clay stove, fresh tropical vegetables on wooden table, lemongrass chilies kaffir lime eggplants, lush green garden in background, natural soft light, photorealistic documentary style',
-  rice:    'Thai farmers transplanting rice seedlings in flooded paddy field at sunrise, water buffalo plowing earth, traditional bamboo huts with rising smoke, misty mountains in distance, golden warm light, cinematic landscape, ultra-realistic photography',
-  river:   'Aerial view of Thai riverside vegetable farms along winding tropical canal, traditional wooden longboats moored at bank, coconut palms lining waterway, vibrant green crop rows, farmers working, golden sunset light on water, photorealistic bird\'s eye view',
-  aerial:  'Drone aerial view of stunning Thai organic farm, symmetrical raised vegetable beds in grid pattern, central koi pond with lotus flowers, bamboo pathways, chickens roaming, traditional teak farmhouse, surrounded by lush tropical forest and distant mountains, ultra-sharp photorealistic'
+  garden:  'Beautiful Thai organic vegetable garden, neatly arranged raised wooden planting beds filled with lush green vegetables, serene lotus pond in center, bamboo fences, banana and coconut trees, rustic wooden farmhouse in background, misty green mountains, golden hour light, photorealistic landscape photography, ultra high resolution',
+  house:   'Traditional Thai wooden stilt house surrounded by lush green rice paddies, vegetable garden with neat crop rows, coconut and banana trees, peaceful canal nearby, warm tropical landscape, cinematic aerial perspective, golden hour sunset, photorealistic',
+  kitchen: 'Authentic Thai countryside outdoor kitchen under rustic wooden shelter, clay cooking stove with fire, colorful fresh tropical vegetables on wooden table, lemongrass chili kaffir lime eggplants basil, lush green garden background, warm natural soft light, photorealistic food photography style',
+  rice:    'Vast flooded Thai rice paddy field at sunrise, water buffalo near traditional bamboo huts, morning mist over mountains in distance, golden warm light reflecting on water surface, cinematic wide landscape, ultra-realistic photography, no people',
+  river:   'Aerial view of Thai riverside vegetable farms along winding tropical canal, traditional wooden longboats moored at bank, coconut palms lining waterway, vibrant green crop rows, golden sunset light shimmering on water, photorealistic bird\'s eye view drone shot',
+  aerial:  'Drone aerial view of stunning Thai organic farm, symmetrical raised vegetable beds in grid pattern, central koi pond with lotus flowers, bamboo pathways, traditional teak farmhouse, surrounded by lush tropical forest and distant misty mountains, ultra-sharp photorealistic'
 };
 
 const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
@@ -591,23 +591,27 @@ async function generate() {
         blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
 
       } else {
-        // Imagen 3 via Gemini API
+        // Gemini 2.0 Flash image generation
         const resp = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=' + apiKey,
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=' + apiKey,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              instances: [{ prompt }],
-              parameters: { sampleCount: 1, aspectRatio: w === h ? '1:1' : (w > h ? '16:9' : '9:16') }
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
             })
           }
         );
         const data = await resp.json();
         if (data.error) throw new Error(data.error.message);
-        const b64 = data.predictions[0].bytesBase64Encoded;
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const imgPart = parts.find(p => p.inlineData);
+        if (!imgPart) throw new Error('ไม่ได้รับภาพจาก Gemini — ลองใหม่อีกครั้ง');
+        const b64 = imgPart.inlineData.data;
+        const mime = imgPart.inlineData.mimeType || 'image/png';
         const byteArr = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-        blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
+        blobUrl = URL.createObjectURL(new Blob([byteArr], { type: mime }));
       }
 
       card.querySelector('.card-img').innerHTML = '';
