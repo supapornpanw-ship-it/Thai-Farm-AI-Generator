@@ -282,7 +282,7 @@
   <span style="font-size:24px">🌾</span>
   <div>
     <h1>Thai Farm AI Generator</h1>
-    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • Google Nano Banana Pro / Phaya</p>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • Google Nano Banana / Phaya</p>
   </div>
   <span class="free-badge">✨ Replicate · Phaya</span>
 </header>
@@ -299,7 +299,7 @@
       <div style="display:flex;gap:6px">
         <button id="btnOpenAI" onclick="setProvider('openai')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #6ab04c;background:#243020;color:#b8e090">
-          Nano Banana Pro
+          Nano Banana
         </button>
         <button id="btnGemini" onclick="setProvider('gemini')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
@@ -317,7 +317,7 @@
             style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
         </div>
         <div id="statusOpenAI" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Key</div>
-        <div style="font-size:10px;color:#445533;margin-top:4px">Google Nano Banana Pro • 2K • Replicate</div>
+        <div style="font-size:10px;color:#445533;margin-top:4px">Google Nano Banana (Gemini 2.5) • $0.039/ภาพ • Replicate</div>
       </div>
 
       <!-- Phaya / Nano Banana 2 key -->
@@ -431,15 +431,15 @@
 <div id="toast"></div>
 
 <script>
-const PHOTO_BASE = 'photo taken on iPhone, candid snapshot, slightly imperfect, natural ambient light, no studio lighting, unposed, raw unedited JPEG, realistic colors, real life';
+const PHOTO_BASE = 'masterpiece, best quality, photorealistic, 8K ultra detailed, cinematic composition, vibrant saturated colors, sharp focus, hyper detailed foliage, golden hour warm light, peaceful rural Thailand, highly detailed, trending on artstation';
 
 const THEMES = {
-  garden:  'a photo of a small Thai vegetable garden, raised wooden beds with green vegetables, banana tree, bamboo fence, dirt path, old wooden house in background, overcast morning light, Chiang Mai Thailand',
-  house:   'a photo of an old Thai wooden stilt house, weathered grey teak planks, dirt yard, vegetable patch, coconut tree, muddy canal nearby, afternoon cloudy sky, rural northern Thailand',
-  kitchen: 'a photo of a Thai outdoor kitchen in a rural backyard, clay charcoal stove, old wooden table with lemongrass green chilies eggplants kaffir lime leaves, bamboo wall, garden visible behind, natural daylight',
-  rice:    'a photo of flat green rice paddy fields in rural Thailand, flooded terraces, small dirt road, simple bamboo shed in distance, overcast sky, morning light, central Thailand countryside',
-  river:   'a drone photo of a narrow canal in rural Thailand, rice paddies on the left, vegetable plots on the right, two wooden boats, coconut palms, late afternoon light',
-  aerial:  'a drone photo looking straight down at a small Thai organic farm, rectangular vegetable beds, dirt paths, small fish pond, old tin-roof farmhouse, surrounded by trees'
+  garden:  'beautiful Thai organic vegetable garden, raised wooden planting beds with lush green vegetables, banana trees, bamboo fence, koi fish pond, traditional wooden house in background, lush tropical garden, Chiang Mai Thailand countryside',
+  house:   'beautiful traditional Thai wooden stilt house, warm teak wood, colorful flower garden surrounding, coconut palms, green rice paddy fields in background, rural northern Thailand village, serene peaceful atmosphere',
+  kitchen: 'beautiful Thai countryside outdoor kitchen, clay charcoal stove, fresh vegetables lemongrass chilies eggplants, rustic wooden table, tropical garden background, warm morning light, lush greenery',
+  rice:    'breathtaking vast green rice paddy fields in rural Thailand, lush emerald terraces, winding dirt path, traditional bamboo hut, dramatic cloudy sky, vibrant green colors, central Thailand countryside',
+  river:   'stunning aerial view of narrow canal in rural Thailand, lush rice paddies on both sides, two traditional wooden longtail boats, tall coconut palms, golden sunset light reflecting on water',
+  aerial:  'beautiful bird\'s eye drone view of Thai organic farm, symmetrical vegetable garden beds, koi fish pond, traditional teak farmhouse with tin roof, surrounded by lush tropical trees and rice fields'
 };
 
 const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
@@ -584,8 +584,8 @@ async function generate() {
       let blobUrl;
 
       if (provider === 'openai') {
-        // Google Nano Banana Pro via Replicate
-        const nanoUrl = 'https://api.replicate.com/v1/models/google/nano-banana-pro/predictions';
+        // Google Nano Banana via Replicate
+        const nanoUrl = 'https://api.replicate.com/v1/models/google/nano-banana/predictions';
         const nanoAr = ar === '4:5' ? '4:5' : ar === '9:16' ? '9:16' : ar === '16:9' ? '16:9' : '1:1';
         const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(nanoUrl), {
           method: 'POST',
@@ -600,7 +600,7 @@ async function generate() {
         if (data.detail || data.error) throw new Error(typeof (data.detail||data.error) === 'string' ? (data.detail||data.error) : JSON.stringify(data.detail||data.error));
         const parseOut = o => Array.isArray(o) ? o[0] : (typeof o === 'string' ? o : null);
         let imgUrl2 = parseOut(data.output);
-        // Poll until done (nano-banana-pro ใช้เวลานาน ~2 นาที)
+        // Poll until done (nano-banana ใช้เวลา ~1 นาที)
         if (!imgUrl2 && data.id) {
           const pollUrl = 'https://api.replicate.com/v1/predictions/' + data.id;
           for (let att = 0; att < 60 && !imgUrl2; att++) {
