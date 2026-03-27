@@ -622,15 +622,25 @@ async function generate() {
           jobId  && 'https://api.phaya.io/api/v1/nano-banana/status/' + jobId,
         ].filter(Boolean);
 
-        // รอก่อน 10 วินาที แล้ว poll ครั้งแรก — แสดง raw response ทันที
+        // ลองทุก endpoint ด้วย job_id แสดง response ทุกตัว
         await new Promise(r => setTimeout(r, 10000));
-        if (ldEl) ldEl.textContent = 'รอ 10s... (polling)';
-        const firstUrl = pollEndpoints[0];
-        const firstResp = await fetch('https://corsproxy.io/?' + encodeURIComponent(firstUrl), {
-          headers: { 'Authorization': 'Bearer ' + apiKey }
-        });
-        const firstData = await firstResp.json();
-        throw new Error(`HTTP${firstResp.status} | ${JSON.stringify(firstData).slice(0,300)}`);
+        if (ldEl) ldEl.textContent = 'รอ 10s... (probing endpoints)';
+        const testEndpoints = [
+          'https://api.phaya.io/api/v1/jobs/' + jobId,
+          'https://api.phaya.io/api/v1/tasks/' + jobId,
+          'https://api.phaya.io/api/v1/nano-banana/' + jobId,
+          'https://api.phaya.io/api/v1/nano-banana/task/' + jobId,
+        ];
+        const results = [];
+        for (const u of testEndpoints) {
+          const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(u), {
+            headers: { 'Authorization': 'Bearer ' + apiKey }
+          });
+          const d = await r.json().catch(() => ({}));
+          results.push(`[${u.split('/v1/')[1]}]=${r.status}:${JSON.stringify(d).slice(0,80)}`);
+          if (r.ok) { lastPollData = d; break; }
+        }
+        throw new Error(results.join(' | '));
         blobUrl = await new Promise((res, rej) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
