@@ -622,28 +622,15 @@ async function generate() {
           jobId  && 'https://api.phaya.io/api/v1/nano-banana/status/' + jobId,
         ].filter(Boolean);
 
-        for (let attempt = 0; attempt < 60 && !imgUrl; attempt++) {
-          await new Promise(r => setTimeout(r, 5000));
-          if (ldEl) ldEl.textContent = `รอ ${(attempt+1)*5}s...`;
-          for (const pollUrl of pollEndpoints) {
-            const pollResp = await fetch('https://corsproxy.io/?' + encodeURIComponent(pollUrl), {
-              headers: { 'Authorization': 'Bearer ' + apiKey }
-            });
-            lastPollData = await pollResp.json();
-            const s = lastPollData.status || lastPollData.state;
-            if (s === 'completed' || s === 'done' || s === 'success' || s === 'finished') {
-              imgUrl = lastPollData.image_url || lastPollData.url || lastPollData.output
-                || lastPollData.result || lastPollData.data?.[0]?.url
-                || lastPollData.images?.[0]?.url || lastPollData.images?.[0];
-              if (imgUrl) break;
-            } else if (s === 'failed' || s === 'error') {
-              throw new Error(lastPollData.message || 'Phaya job failed');
-            }
-            // log first poll for debugging
-            if (attempt === 0) console.log('poll[' + pollUrl.split('/').pop() + ']:', JSON.stringify(lastPollData).slice(0,200));
-          }
-        }
-        if (!imgUrl) throw new Error('Poll data: ' + JSON.stringify(lastPollData).slice(0,200));
+        // รอก่อน 10 วินาที แล้ว poll ครั้งแรก — แสดง raw response ทันที
+        await new Promise(r => setTimeout(r, 10000));
+        if (ldEl) ldEl.textContent = 'รอ 10s... (polling)';
+        const firstUrl = pollEndpoints[0];
+        const firstResp = await fetch('https://corsproxy.io/?' + encodeURIComponent(firstUrl), {
+          headers: { 'Authorization': 'Bearer ' + apiKey }
+        });
+        const firstData = await firstResp.json();
+        throw new Error(`HTTP${firstResp.status} | ${JSON.stringify(firstData).slice(0,300)}`);
         blobUrl = await new Promise((res, rej) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
