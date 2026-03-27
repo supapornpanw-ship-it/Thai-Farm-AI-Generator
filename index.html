@@ -282,7 +282,7 @@
   <span style="font-size:24px">🌾</span>
   <div>
     <h1>Thai Farm AI Generator</h1>
-    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / Gemini Flash</p>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / FLUX.1</p>
   </div>
   <span class="free-badge">✨ OpenAI · Gemini</span>
 </header>
@@ -303,7 +303,7 @@
         </button>
         <button id="btnGemini" onclick="setProvider('gemini')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
-          Gemini Flash
+          HuggingFace
         </button>
       </div>
 
@@ -320,17 +320,17 @@
         <div style="font-size:10px;color:#445533;margin-top:4px">~$0.04/ภาพ • คุณภาพสูงสุด</div>
       </div>
 
-      <!-- Gemini key -->
+      <!-- HuggingFace key -->
       <div id="panelGemini" style="display:none">
-        <div style="font-size:10px;color:#78a050;margin-bottom:5px">Gemini API Key</div>
+        <div style="font-size:10px;color:#78a050;margin-bottom:5px">HuggingFace Token</div>
         <div style="display:flex;gap:7px">
-          <input type="password" id="geminiKey" placeholder="AIza..."
+          <input type="password" id="geminiKey" placeholder="hf_..."
             style="flex:1;background:#13150f;border:1px solid #333;border-radius:6px;padding:7px 9px;color:#e0dcc8;font-size:12px;font-family:monospace" />
           <button onclick="saveKey('gemini')"
             style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
         </div>
-        <div id="statusGemini" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Key</div>
-        <div style="font-size:10px;color:#445533;margin-top:4px">ฟรี • Gemini 2.0 Flash Image Gen</div>
+        <div id="statusGemini" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Token</div>
+        <div style="font-size:10px;color:#445533;margin-top:4px">ฟรี • huggingface.co/settings/tokens</div>
       </div>
     </div>
 
@@ -597,27 +597,24 @@ async function generate() {
         blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
 
       } else {
-        // Gemini 2.0 Flash image generation
+        // HuggingFace FLUX.1-schnell (free)
         const resp = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=' + apiKey,
+          'https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-            })
+            headers: {
+              'Authorization': 'Bearer ' + apiKey,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ inputs: prompt })
           }
         );
-        const data = await resp.json();
-        if (data.error) throw new Error(data.error.message);
-        const parts = data.candidates?.[0]?.content?.parts || [];
-        const imgPart = parts.find(p => p.inlineData);
-        if (!imgPart) throw new Error('ไม่ได้รับภาพจาก Gemini — ลองใหม่อีกครั้ง');
-        const b64 = imgPart.inlineData.data;
-        const mime = imgPart.inlineData.mimeType || 'image/png';
-        const byteArr = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-        blobUrl = URL.createObjectURL(new Blob([byteArr], { type: mime }));
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.error || `HuggingFace error ${resp.status}`);
+        }
+        const blob = await resp.blob();
+        blobUrl = URL.createObjectURL(blob);
       }
 
       card.querySelector('.card-img').innerHTML = '';
