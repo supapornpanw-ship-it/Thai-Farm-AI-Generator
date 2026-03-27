@@ -282,7 +282,7 @@
   <span style="font-size:24px">🌾</span>
   <div>
     <h1>Thai Farm AI Generator</h1>
-    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • FLUX.1-dev / Nano Banana 2</p>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • FLUX 1.1 Pro / Nano Banana 2</p>
   </div>
   <span class="free-badge">✨ Replicate · Phaya</span>
 </header>
@@ -299,7 +299,7 @@
       <div style="display:flex;gap:6px">
         <button id="btnOpenAI" onclick="setProvider('openai')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #6ab04c;background:#243020;color:#b8e090">
-          FLUX.1-dev
+          FLUX 1.1 Pro
         </button>
         <button id="btnGemini" onclick="setProvider('gemini')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
@@ -431,15 +431,15 @@
 <div id="toast"></div>
 
 <script>
-const PHOTO_BASE = 'documentary photography, shot on Nikon D850, 35mm lens, f/2.8, ISO 200, natural daylight, photojournalism, National Geographic style, ultra-realistic, 8K resolution, sharp focus, true-to-life colors, raw unedited photograph';
+const PHOTO_BASE = 'photo taken on iPhone, candid snapshot, slightly imperfect, natural ambient light, no studio lighting, unposed, raw unedited JPEG, realistic colors, real life';
 
 const THEMES = {
-  garden:  'documentary photograph of a Thai organic vegetable farm, raised wooden planting beds with lush green vegetables, small lotus pond, bamboo fence, banana trees, old teak farmhouse in background, morning mist over mountains, rural Chiang Mai Thailand, eye-level camera angle, natural sunlight',
-  house:   'documentary photograph of a traditional Thai wooden stilt house, weathered teak wood, surrounded by rice paddies and vegetable plots, coconut trees, peaceful muddy canal, afternoon golden light, rural northern Thailand village, realistic textures',
-  kitchen: 'documentary photograph of a Thai countryside outdoor kitchen, clay pot stove with charcoal fire, fresh vegetables on worn wooden table — lemongrass, kaffir lime, green chilies, eggplants — open-air bamboo shelter, green tropical garden background, warm natural light',
-  rice:    'documentary photograph of flooded Thai rice paddy fields at sunrise, young green rice seedlings, water reflecting pink sky, traditional bamboo hut in distance, morning ground fog over flat farmland, rural central Thailand, wide angle shot',
-  river:   'drone aerial photograph looking down at Thai riverside vegetable farms, narrow tropical canal, rows of green crops, wooden longboats moored at bank, coconut palms casting shadows, golden hour warm light, rural Thailand countryside',
-  aerial:  'drone aerial photograph of Thai organic farm from above, rectangular raised vegetable beds in neat rows, small koi fish pond with lotus flowers, bamboo walkways, old teak farmhouse roof, dense tropical forest surrounding the farm, misty mountain backdrop'
+  garden:  'a photo of a small Thai vegetable garden, raised wooden beds with green vegetables, banana tree, bamboo fence, dirt path, old wooden house in background, overcast morning light, Chiang Mai Thailand',
+  house:   'a photo of an old Thai wooden stilt house, weathered grey teak planks, dirt yard, vegetable patch, coconut tree, muddy canal nearby, afternoon cloudy sky, rural northern Thailand',
+  kitchen: 'a photo of a Thai outdoor kitchen in a rural backyard, clay charcoal stove, old wooden table with lemongrass green chilies eggplants kaffir lime leaves, bamboo wall, garden visible behind, natural daylight',
+  rice:    'a photo of flat green rice paddy fields in rural Thailand, flooded terraces, small dirt road, simple bamboo shed in distance, overcast sky, morning light, central Thailand countryside',
+  river:   'a drone photo of a narrow canal in rural Thailand, rice paddies on the left, vegetable plots on the right, two wooden boats, coconut palms, late afternoon light',
+  aerial:  'a drone photo looking straight down at a small Thai organic farm, rectangular vegetable beds, dirt paths, small fish pond, old tin-roof farmhouse, surrounded by trees'
 };
 
 const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
@@ -585,7 +585,7 @@ async function generate() {
 
       if (provider === 'openai') {
         // FLUX.1-dev via Replicate
-        const fluxUrl = 'https://api.replicate.com/v1/models/black-forest-labs/flux-dev/predictions';
+        const fluxUrl = 'https://api.replicate.com/v1/models/black-forest-labs/flux-1.1-pro/predictions';
         const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(fluxUrl), {
           method: 'POST',
           headers: {
@@ -593,7 +593,7 @@ async function generate() {
             'Content-Type': 'application/json',
             'Prefer': 'wait'
           },
-          body: JSON.stringify({ input: { prompt, width: w, height: h, output_format: 'jpg', output_quality: 95, num_inference_steps: 35, guidance: 4.5 } })
+          body: JSON.stringify({ input: { prompt, width: w, height: h, output_format: 'jpg', output_quality: 95, prompt_upsampling: false } })
         });
         const data = await resp.json();
         if (data.detail || data.error) throw new Error(data.detail || data.error);
