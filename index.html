@@ -396,7 +396,7 @@
       <div class="sec-label">✍️ Prompt</div>
       <textarea id="pt"></textarea>
       <div class="row">
-        <button class="btn-s" onclick="build()">🔄 สร้างใหม่</button>
+        <button class="btn-s" onclick="build(true)">🔄 สร้างใหม่</button>
         <button class="btn-s" onclick="copyPt()">📋 Copy</button>
       </div>
     </div>
@@ -503,15 +503,54 @@ function setFmt(btn, nw, nh, ratio) {
 }
 
 function toggleMood(el, m) {
-  moods.has(m) ? (moods.delete(m), el.classList.remove('active'))
-               : (moods.add(m),    el.classList.add('active'));
+  // Radio behavior — เลือกได้ครั้งละ 1 เท่านั้น
+  const wasActive = el.classList.contains('active');
+  document.querySelectorAll('.mtag').forEach(t => t.classList.remove('active'));
+  moods.clear();
+  if (!wasActive) { moods.add(m); el.classList.add('active'); }
   build();
 }
 
-function build() {
+// คลังคำสุ่มสำหรับ "สร้างใหม่"
+const ANGLE_VARS = [
+  'wide angle composition, expansive view',
+  'telephoto compressed perspective, 85mm lens',
+  'low angle ground level view looking upward',
+  'slightly elevated bird\'s eye 45 degree angle',
+  'centered symmetrical composition',
+  'off-center rule of thirds framing',
+];
+const DETAIL_VARS = [
+  'white egret bird standing in paddy field',
+  'chickens roaming freely near farmhouse',
+  'water buffalo grazing in far background',
+  'morning mist lingering at ground level',
+  'dragonflies hovering over water surface',
+  'farmer\'s bamboo tools leaning against wall',
+  'orange tabby cat resting on wooden step',
+  'smoke rising from distant neighbor\'s kitchen',
+  'flock of sparrows on power line overhead',
+  'large golden orb spider web between bamboo',
+];
+
+function build(randomize = false) {
   const mood = [...moods].join(', ');
-  const add  = `${mood ? mood + ', ' : ''}${PHOTO_BASE}`;
-  document.getElementById('pt').value = THEMES[theme] + '. ' + add;
+  let base = THEMES[theme];
+  if (randomize) {
+    const a = ANGLE_VARS[Math.floor(Math.random() * ANGLE_VARS.length)];
+    const d = DETAIL_VARS[Math.floor(Math.random() * DETAIL_VARS.length)];
+    base += `, ${a}, ${d}`;
+  }
+  const add = `${mood ? mood + ', ' : ''}${PHOTO_BASE}`;
+  document.getElementById('pt').value = base + '. ' + add;
+}
+
+// สร้าง prompt ที่แตกต่างกันสำหรับแต่ละภาพเมื่อ count > 1
+function variedPrompt(base, idx) {
+  if (idx === 0) return base;
+  const a = ANGLE_VARS[idx % ANGLE_VARS.length];
+  const d = DETAIL_VARS[Math.floor(Math.random() * DETAIL_VARS.length)];
+  return base + `, ${a}, ${d}`;
 }
 
 function copyPt() {
@@ -582,6 +621,9 @@ async function generate() {
 
     try {
       let blobUrl;
+      // แต่ละภาพใช้ prompt ที่ต่างกัน + seed สุ่ม
+      const iPrompt = variedPrompt(prompt, i);
+      const iSeed   = Math.floor(Math.random() * 2147483647);
 
       if (provider === 'openai') {
         // Google Nano Banana via Replicate
@@ -594,7 +636,7 @@ async function generate() {
             'Content-Type': 'application/json',
             'Prefer': 'wait'
           },
-          body: JSON.stringify({ input: { prompt, aspect_ratio: nanoAr, resolution: '2K' } })
+          body: JSON.stringify({ input: { prompt: iPrompt, aspect_ratio: nanoAr, seed: iSeed } })
         });
         const data = await resp.json();
         if (data.detail || data.error) throw new Error(typeof (data.detail||data.error) === 'string' ? (data.detail||data.error) : JSON.stringify(data.detail||data.error));
@@ -623,7 +665,7 @@ async function generate() {
         const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(phayaUrl), {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, aspect_ratio: ar, resolution: '1K', output_format: 'jpg' })
+          body: JSON.stringify({ prompt: iPrompt, aspect_ratio: ar, resolution: '1K', output_format: 'jpg' })
         });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.message || data.error || `Phaya error ${resp.status}`);
