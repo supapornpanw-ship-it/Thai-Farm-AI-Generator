@@ -282,9 +282,9 @@
   <span style="font-size:24px">🌾</span>
   <div>
     <h1>Thai Farm AI Generator</h1>
-    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / Nano Banana 2</p>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • FLUX.1-dev / Nano Banana 2</p>
   </div>
-  <span class="free-badge">✨ OpenAI · Gemini</span>
+  <span class="free-badge">✨ Replicate · Phaya</span>
 </header>
 
 <div class="layout">
@@ -299,7 +299,7 @@
       <div style="display:flex;gap:6px">
         <button id="btnOpenAI" onclick="setProvider('openai')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #6ab04c;background:#243020;color:#b8e090">
-          DALL-E 3
+          FLUX.1-dev
         </button>
         <button id="btnGemini" onclick="setProvider('gemini')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
@@ -307,17 +307,17 @@
         </button>
       </div>
 
-      <!-- OpenAI key -->
+      <!-- Replicate key -->
       <div id="panelOpenAI">
-        <div style="font-size:10px;color:#78a050;margin-bottom:5px">OpenAI API Key</div>
+        <div style="font-size:10px;color:#78a050;margin-bottom:5px">Replicate API Token</div>
         <div style="display:flex;gap:7px">
-          <input type="password" id="openaiKey" placeholder="sk-..."
+          <input type="password" id="openaiKey" placeholder="r8_..."
             style="flex:1;background:#13150f;border:1px solid #333;border-radius:6px;padding:7px 9px;color:#e0dcc8;font-size:12px;font-family:monospace" />
           <button onclick="saveKey('openai')"
             style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
         </div>
         <div id="statusOpenAI" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Key</div>
-        <div style="font-size:10px;color:#445533;margin-top:4px">~$0.04/ภาพ • คุณภาพสูงสุด</div>
+        <div style="font-size:10px;color:#445533;margin-top:4px">~$0.025/ภาพ • Photorealistic สูง</div>
       </div>
 
       <!-- Phaya / Nano Banana 2 key -->
@@ -584,17 +584,36 @@ async function generate() {
       let blobUrl;
 
       if (provider === 'openai') {
-        // DALL-E 3
-        const dalleSize = ar === '1:1' ? '1024x1024' : ar === '16:9' ? '1792x1024' : '1024x1792';
-        const resp = await fetch('https://api.openai.com/v1/images/generations', {
+        // FLUX.1-dev via Replicate
+        const fluxUrl = 'https://api.replicate.com/v1/models/black-forest-labs/flux-dev/predictions';
+        const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(fluxUrl), {
           method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size: dalleSize, response_format: 'b64_json' })
+          headers: {
+            'Authorization': 'Token ' + apiKey,
+            'Content-Type': 'application/json',
+            'Prefer': 'wait'
+          },
+          body: JSON.stringify({ input: { prompt, width: w, height: h, output_format: 'jpg', output_quality: 95, num_inference_steps: 28 } })
         });
         const data = await resp.json();
-        if (data.error) throw new Error(data.error.message);
-        const byteArr = Uint8Array.from(atob(data.data[0].b64_json), c => c.charCodeAt(0));
-        blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
+        if (data.detail || data.error) throw new Error(data.detail || data.error);
+        let imgUrl2 = data.output?.[0];
+        // Poll if not done yet
+        if (!imgUrl2 && data.id) {
+          const pollUrl = 'https://api.replicate.com/v1/predictions/' + data.id;
+          for (let att = 0; att < 40 && !imgUrl2; att++) {
+            await new Promise(r => setTimeout(r, 3000));
+            if (ldEl) ldEl.textContent = `FLUX รอ ${(att+1)*3}s...`;
+            const pr = await fetch('https://corsproxy.io/?' + encodeURIComponent(pollUrl), {
+              headers: { 'Authorization': 'Token ' + apiKey }
+            });
+            const pd = await pr.json();
+            if (pd.status === 'succeeded') imgUrl2 = pd.output?.[0];
+            else if (pd.status === 'failed') throw new Error('FLUX failed: ' + (pd.error || 'unknown'));
+          }
+        }
+        if (!imgUrl2) throw new Error('FLUX timeout');
+        blobUrl = imgUrl2;
 
       } else {
         // Phaya — Nano Banana 2 (via CORS proxy)
