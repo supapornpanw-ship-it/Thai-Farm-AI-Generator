@@ -431,15 +431,15 @@
 <div id="toast"></div>
 
 <script>
-const PHOTO_BASE = 'RAW photo, shot on Sony A7R IV, 24mm f/2.8 lens, natural light, photojournalism documentary style, real photograph, no painting, no illustration, no digital art, no CGI, no rendering, hyperrealistic, true-to-life colors, film grain texture, shallow depth of field';
+const PHOTO_BASE = 'documentary photography, shot on Nikon D850, 35mm lens, f/2.8, ISO 200, natural daylight, photojournalism, National Geographic style, ultra-realistic, 8K resolution, sharp focus, true-to-life colors, raw unedited photograph';
 
 const THEMES = {
-  garden:  'Real photograph of a Thai organic vegetable garden, neatly arranged raised wooden planting beds filled with lush green vegetables, lotus pond, bamboo fences, banana trees, rustic wooden farmhouse in background, misty mountains, Thailand',
-  house:   'Real photograph of a traditional Thai wooden stilt house surrounded by rice paddies, vegetable garden, coconut trees, peaceful canal, warm afternoon light, rural Thailand countryside',
-  kitchen: 'Real photograph of a Thai countryside outdoor kitchen under wooden shelter, clay stove, fresh tropical vegetables on wooden table, lemongrass chili kaffir lime eggplants, lush garden background, warm natural light',
-  rice:    'Real photograph of vast flooded Thai rice paddy field at sunrise, water buffalo, traditional bamboo huts, morning mist over limestone mountains, golden light reflecting on water, no people, rural Thailand',
-  river:   'Real aerial drone photograph of Thai riverside vegetable farms along tropical canal, wooden longboats, coconut palms, vibrant green crops, golden hour light on water surface, rural Thailand',
-  aerial:  'Real drone aerial photograph of Thai organic farm, raised vegetable beds in grid pattern, koi pond with lotus, bamboo paths, teak farmhouse, surrounded by tropical forest and misty mountains'
+  garden:  'documentary photograph of a Thai organic vegetable farm, raised wooden planting beds with lush green vegetables, small lotus pond, bamboo fence, banana trees, old teak farmhouse in background, morning mist over mountains, rural Chiang Mai Thailand, eye-level camera angle, natural sunlight',
+  house:   'documentary photograph of a traditional Thai wooden stilt house, weathered teak wood, surrounded by rice paddies and vegetable plots, coconut trees, peaceful muddy canal, afternoon golden light, rural northern Thailand village, realistic textures',
+  kitchen: 'documentary photograph of a Thai countryside outdoor kitchen, clay pot stove with charcoal fire, fresh vegetables on worn wooden table — lemongrass, kaffir lime, green chilies, eggplants — open-air bamboo shelter, green tropical garden background, warm natural light',
+  rice:    'documentary photograph of flooded Thai rice paddy fields at sunrise, young green rice seedlings, water reflecting pink sky, traditional bamboo hut in distance, morning ground fog over flat farmland, rural central Thailand, wide angle shot',
+  river:   'drone aerial photograph looking down at Thai riverside vegetable farms, narrow tropical canal, rows of green crops, wooden longboats moored at bank, coconut palms casting shadows, golden hour warm light, rural Thailand countryside',
+  aerial:  'drone aerial photograph of Thai organic farm from above, rectangular raised vegetable beds in neat rows, small koi fish pond with lotus flowers, bamboo walkways, old teak farmhouse roof, dense tropical forest surrounding the farm, misty mountain backdrop'
 };
 
 const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
@@ -593,7 +593,7 @@ async function generate() {
             'Content-Type': 'application/json',
             'Prefer': 'wait'
           },
-          body: JSON.stringify({ input: { prompt, width: w, height: h, output_format: 'jpg', output_quality: 95, num_inference_steps: 28 } })
+          body: JSON.stringify({ input: { prompt, width: w, height: h, output_format: 'jpg', output_quality: 95, num_inference_steps: 35, guidance: 4.5 } })
         });
         const data = await resp.json();
         if (data.detail || data.error) throw new Error(data.detail || data.error);
