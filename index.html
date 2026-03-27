@@ -622,25 +622,31 @@ async function generate() {
           jobId  && 'https://api.phaya.io/api/v1/nano-banana/status/' + jobId,
         ].filter(Boolean);
 
-        // ลองทุก endpoint ด้วย job_id แสดง response ทุกตัว
-        await new Promise(r => setTimeout(r, 10000));
-        if (ldEl) ldEl.textContent = 'รอ 10s... (probing endpoints)';
-        const testEndpoints = [
-          'https://api.phaya.io/api/v1/jobs/' + jobId,
-          'https://api.phaya.io/api/v1/tasks/' + jobId,
-          'https://api.phaya.io/api/v1/nano-banana/' + jobId,
-          'https://api.phaya.io/api/v1/nano-banana/task/' + jobId,
-        ];
-        const results = [];
-        for (const u of testEndpoints) {
-          const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(u), {
+        // Get user folder ID from /me endpoint (cached in localStorage)
+        let folderId = localStorage.getItem('phaya_folder_id');
+        if (!folderId) {
+          const meResp = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.phaya.io/api/v1/me'), {
             headers: { 'Authorization': 'Bearer ' + apiKey }
           });
-          const d = await r.json().catch(() => ({}));
-          results.push(`[${u.split('/v1/')[1]}]=${r.status}:${JSON.stringify(d).slice(0,80)}`);
-          if (r.ok) { lastPollData = d; break; }
+          const meData = await meResp.json();
+          folderId = meData.id || meData.user_id || meData.uuid || meData.user?.id;
+          if (folderId) localStorage.setItem('phaya_folder_id', folderId);
         }
-        throw new Error(results.join(' | '));
+        if (!folderId) {
+          folderId = localStorage.getItem('phaya_folder_id_manual');
+          if (!folderId) throw new Error('ไม่พบ Folder ID — กรุณาใส่ใน localStorage key "phaya_folder_id_manual"');
+        }
+
+        // Poll Supabase storage directly
+        const supaBase = 'https://bvlkdbigeaecqdmkzrvc.supabase.co/storage/v1/object/public/media-outputs/outputs/nano-banana';
+        for (let attempt = 0; attempt < 60 && !imgUrl; attempt++) {
+          await new Promise(r => setTimeout(r, 5000));
+          if (ldEl) ldEl.textContent = `รอ ${(attempt+1)*5}s...`;
+          const tryUrl = `${supaBase}/${folderId}/${jobId}.jpg`;
+          const chk = await fetch(tryUrl, { method: 'HEAD' });
+          if (chk.ok) { imgUrl = tryUrl; break; }
+        }
+        if (!imgUrl) throw new Error('ภาพยังไม่เสร็จหรือ folder ID ผิด (folderId=' + folderId + ')');
         blobUrl = await new Promise((res, rej) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
@@ -710,22 +716,30 @@ async function retryCard(cardId, retryPrompt) {
     if (!resp.ok) throw new Error(data.message || 'Phaya error');
     const taskId = data.task_id; const jobId = data.job_id;
     const ldEl = card.querySelector('.ld-text');
-    let imgUrl = null, lastPollData = null;
-    const pollEndpoints = [taskId && 'https://api.phaya.io/api/v1/tasks/'+taskId, jobId && 'https://api.phaya.io/api/v1/jobs/'+jobId].filter(Boolean);
+    let imgUrl = null;
+    // Get folder ID (same logic as main generate)
+    let folderId2 = localStorage.getItem('phaya_folder_id');
+    if (!folderId2) {
+      try {
+        const meR = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.phaya.io/api/v1/me'), {
+          headers: { 'Authorization': 'Bearer ' + apiKey }
+        });
+        const meD = await meR.json();
+        folderId2 = meD.id || meD.user_id || meD.uuid || meD.user?.id;
+        if (folderId2) localStorage.setItem('phaya_folder_id', folderId2);
+      } catch(e2) {}
+    }
+    if (!folderId2) folderId2 = localStorage.getItem('phaya_folder_id_manual');
+    if (!folderId2) throw new Error('ไม่พบ Folder ID');
+    const supaBase2 = 'https://bvlkdbigeaecqdmkzrvc.supabase.co/storage/v1/object/public/media-outputs/outputs/nano-banana';
     for (let att = 0; att < 60 && !imgUrl; att++) {
       await new Promise(r => setTimeout(r, 5000));
       if (ldEl) ldEl.textContent = `รอ ${(att+1)*5}s...`;
-      for (const u of pollEndpoints) {
-        const pr = await fetch('https://corsproxy.io/?'+encodeURIComponent(u),{headers:{'Authorization':'Bearer '+apiKey}});
-        lastPollData = await pr.json();
-        const s = lastPollData.status||lastPollData.state;
-        if (s==='completed'||s==='done'||s==='success'||s==='finished') {
-          imgUrl = lastPollData.image_url||lastPollData.url||lastPollData.output||lastPollData.result||lastPollData.data?.[0]?.url||lastPollData.images?.[0]?.url||lastPollData.images?.[0];
-          if (imgUrl) break;
-        } else if (s==='failed'||s==='error') throw new Error('Phaya job failed');
-      }
+      const tryUrl = `${supaBase2}/${folderId2}/${jobId}.jpg`;
+      const chk = await fetch(tryUrl, { method: 'HEAD' });
+      if (chk.ok) { imgUrl = tryUrl; break; }
     }
-    if (!imgUrl) throw new Error('Poll: '+JSON.stringify(lastPollData).slice(0,150));
+    if (!imgUrl) throw new Error('ภาพยังไม่เสร็จ (folderId=' + folderId2 + ')');
     card.querySelector('.card-img').innerHTML = '';
     const imgEl = document.createElement('img');
     imgEl.src = imgUrl; imgEl.style.cssText = 'width:100%;display:block;';
