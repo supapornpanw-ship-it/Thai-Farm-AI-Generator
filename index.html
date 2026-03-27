@@ -94,6 +94,7 @@
       border-radius: 2px;
     }
     .fbtn.sq   .fbox { width: 24px; height: 24px; }
+    .fbtn.four5 .fbox { width: 22px; height: 27px; }
     .fbtn.port .fbox { width: 16px; height: 28px; }
     .fbtn.land .fbox { width: 30px; height: 18px; }
     .fbtn.active .fbox { background: #6ab04c; }
@@ -362,13 +363,16 @@
     <div>
       <div class="sec-label">📐 Format โซเชียล</div>
       <div class="fmt-row">
-        <button class="fbtn sq active" onclick="setFmt(this,1024,1024)">
+        <button class="fbtn sq active" onclick="setFmt(this,1024,1024,'1:1')">
           <span class="fbox"></span><span>Feed 1:1</span>
         </button>
-        <button class="fbtn port" onclick="setFmt(this,768,1344)">
+        <button class="fbtn four5" onclick="setFmt(this,800,1000,'4:5')">
+          <span class="fbox"></span><span>4:5 FB</span>
+        </button>
+        <button class="fbtn port" onclick="setFmt(this,768,1344,'9:16')">
           <span class="fbox"></span><span>Story/Reels</span>
         </button>
-        <button class="fbtn land" onclick="setFmt(this,1344,768)">
+        <button class="fbtn land" onclick="setFmt(this,1344,768,'16:9')">
           <span class="fbox"></span><span>Landscape</span>
         </button>
       </div>
@@ -438,7 +442,7 @@ const THEMES = {
 
 const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
 
-let theme = 'garden', w = 1024, h = 1024;
+let theme = 'garden', w = 1024, h = 1024, ar = '1:1';
 let moods = new Set(['golden hour warm sunset light']);
 let total = 0;
 let provider = 'openai';
@@ -490,10 +494,10 @@ function setTheme(btn, t) {
   build();
 }
 
-function setFmt(btn, nw, nh) {
+function setFmt(btn, nw, nh, ratio) {
   document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  w = nw; h = nh;
+  w = nw; h = nh; ar = ratio;
 }
 
 function toggleMood(el, m) {
@@ -579,7 +583,7 @@ async function generate() {
 
       if (provider === 'openai') {
         // DALL-E 3
-        const dalleSize = (w === h) ? '1024x1024' : (w > h ? '1792x1024' : '1024x1792');
+        const dalleSize = ar === '1:1' ? '1024x1024' : ar === '16:9' ? '1792x1024' : '1024x1792';
         const resp = await fetch('https://api.openai.com/v1/images/generations', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
