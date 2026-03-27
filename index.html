@@ -606,11 +606,30 @@ async function generate() {
         });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.message || data.error || `Phaya error ${resp.status}`);
-        console.log('Phaya response:', JSON.stringify(data));
-        const imgUrl = data.image_url || data.url || data.output || data.result
-          || data.data?.[0]?.url || data.images?.[0] || data.images?.[0]?.url
-          || (typeof data === 'string' ? data : null);
-        if (!imgUrl) throw new Error('Response: ' + JSON.stringify(data).slice(0, 200));
+
+        // Phaya is async — poll until done
+        const jobId = data.job_id || data.task_id;
+        if (!jobId) throw new Error('No job_id: ' + JSON.stringify(data).slice(0,100));
+
+        let imgUrl = null;
+        for (let attempt = 0; attempt < 30; attempt++) {
+          await new Promise(r => setTimeout(r, 3000));
+          const pollUrl = 'https://api.phaya.io/api/v1/jobs/' + jobId;
+          const pollResp = await fetch('https://corsproxy.io/?' + encodeURIComponent(pollUrl), {
+            headers: { 'Authorization': 'Bearer ' + apiKey }
+          });
+          const pollData = await pollResp.json();
+          const status = pollData.status || pollData.state;
+          if (status === 'completed' || status === 'done' || status === 'success') {
+            imgUrl = pollData.image_url || pollData.url || pollData.output
+              || pollData.result || pollData.data?.[0]?.url || pollData.images?.[0];
+            break;
+          } else if (status === 'failed' || status === 'error') {
+            throw new Error(pollData.message || 'Phaya job failed');
+          }
+          // still processing — keep polling
+        }
+        if (!imgUrl) throw new Error('Timeout รอภาพนานเกินไป ลองใหม่อีกครั้ง');
         blobUrl = await new Promise((res, rej) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
