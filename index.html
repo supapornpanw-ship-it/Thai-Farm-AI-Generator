@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thai Farm AI Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #181a15;
+      color: #eee8d8;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1e2a14;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #3a5a22;
+    }
+    header h1 { font-size: 18px; font-weight: 700; color: #b8e090; }
+    header p  { font-size: 12px; color: #78a050; margin-top: 2px; }
+    .free-badge {
+      margin-left: auto;
+      background: #2d4a1a;
+      border: 1px solid #6ab04c;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: #90d060;
+    }
+
+    .layout { display: flex; height: calc(100vh - 62px); }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: 320px;
+      min-width: 320px;
+      background: #1e201a;
+      border-right: 1px solid #2e3028;
+      overflow-y: auto;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .sec-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #78a050;
+      margin-bottom: 8px;
+    }
+
+    /* Theme */
+    .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .tbtn {
+      background: #252820;
+      border: 1.5px solid #333;
+      border-radius: 8px;
+      padding: 9px 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: .15s;
+    }
+    .tbtn:hover { border-color: #6ab04c; }
+    .tbtn.active { border-color: #6ab04c; background: #243020; }
+    .tbtn .ic  { font-size: 18px; display: block; margin-bottom: 3px; }
+    .tbtn .nm  { font-size: 11px; font-weight: 600; color: #c0e090; }
+    .tbtn .sub { font-size: 10px; color: #78a050; }
+
+    /* Format */
+    .fmt-row { display: flex; gap: 7px; }
+    .fbtn {
+      flex: 1;
+      background: #252820;
+      border: 1.5px solid #333;
+      border-radius: 8px;
+      padding: 9px 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: .15s;
+    }
+    .fbtn:hover { border-color: #6ab04c; }
+    .fbtn.active { border-color: #6ab04c; background: #243020; }
+    .fbtn .fbox {
+      display: block; margin: 0 auto 5px;
+      background: #3a3a30;
+      border-radius: 2px;
+    }
+    .fbtn.sq   .fbox { width: 24px; height: 24px; }
+    .fbtn.port .fbox { width: 16px; height: 28px; }
+    .fbtn.land .fbox { width: 30px; height: 18px; }
+    .fbtn.active .fbox { background: #6ab04c; }
+    .fbtn span { font-size: 10px; color: #aaa; }
+    .fbtn.active span { color: #c0e090; }
+
+    /* Mood tags */
+    .mood-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mtag {
+      background: #252820;
+      border: 1.5px solid #333;
+      border-radius: 16px;
+      padding: 4px 11px;
+      font-size: 11px;
+      color: #aaa;
+      cursor: pointer;
+      transition: .15s;
+      user-select: none;
+    }
+    .mtag:hover { border-color: #6ab04c; color: #c0e090; }
+    .mtag.active { border-color: #6ab04c; background: #243020; color: #c0e090; }
+
+    /* Prompt */
+    textarea {
+      width: 100%;
+      background: #13150f;
+      border: 1px solid #333;
+      border-radius: 7px;
+      padding: 9px;
+      color: #e0dcc8;
+      font-size: 11px;
+      font-family: monospace;
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.55;
+    }
+    textarea:focus { outline: none; border-color: #6ab04c; }
+
+    .row { display: flex; gap: 7px; margin-top: 7px; }
+    .btn-s {
+      background: transparent;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #999;
+      padding: 5px 10px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .btn-s:hover { border-color: #88b060; color: #c0e090; }
+
+    /* Count */
+    .count-row { display: flex; align-items: center; gap: 10px; }
+    .count-row label { font-size: 11px; color: #999; }
+    .count-row input[type=range] { flex: 1; accent-color: #6ab04c; }
+    .count-val { font-size: 15px; font-weight: 700; color: #b8e090; min-width: 20px; text-align: center; }
+
+    /* Gen button */
+    .btn-gen {
+      width: 100%;
+      background: linear-gradient(135deg, #4a8c2a, #2d6a15);
+      border: none;
+      border-radius: 9px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 13px;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .btn-gen:hover { background: linear-gradient(135deg, #5aaa35, #387020); transform: translateY(-1px); }
+    .btn-gen:active { transform: translateY(0); }
+    .btn-gen:disabled { background: #2a2a28; color: #555; cursor: not-allowed; transform: none; }
+
+    /* ─── Main ─── */
+    .main { flex: 1; overflow-y: auto; padding: 20px; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .topbar h2 { font-size: 15px; color: #b8e090; }
+    .topbar .right { display: flex; gap: 8px; align-items: center; }
+    .badge {
+      background: #243020;
+      border: 1px solid #4a7c2a;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      color: #88b060;
+    }
+    .btn-clear {
+      background: transparent;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #888;
+      padding: 3px 10px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .btn-clear:hover { border-color: #b06060; color: #e09090; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+
+    .card {
+      background: #1e201a;
+      border: 1px solid #2e3028;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: .2s;
+    }
+    .card:hover { border-color: #6ab04c; transform: translateY(-2px); box-shadow: 0 4px 20px #0008; }
+
+    .card-img {
+      position: relative;
+      background: #13150f;
+      overflow: hidden;
+    }
+    .card-img img { width: 100%; display: block; }
+    .card-img .overlay {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; background: #13150f;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #2a3a20;
+      border-top-color: #6ab04c;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ld-text { font-size: 12px; color: #78a050; }
+
+    .card-foot {
+      padding: 9px 11px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .card-name { flex: 1; font-size: 11px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cbtn {
+      background: #243020;
+      border: 1px solid #4a7c2a;
+      border-radius: 5px;
+      color: #b8e090;
+      padding: 4px 9px;
+      font-size: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .cbtn:hover { background: #304028; }
+
+    .empty {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100%; gap: 14px; color: #555; text-align: center;
+      min-height: 60vh;
+    }
+    .empty .ico { font-size: 60px; }
+    .empty h2 { font-size: 18px; color: #666; }
+    .empty p  { font-size: 13px; line-height: 1.7; max-width: 320px; }
+    .empty .free { color: #6ab04c; font-weight: 600; }
+
+    #toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #1e2a14; border: 1px solid #6ab04c;
+      color: #b8e090; padding: 9px 16px;
+      border-radius: 7px; font-size: 12px;
+      opacity: 0; transform: translateY(8px);
+      transition: .2s; z-index: 999; pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #181a15; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:24px">🌾</span>
+  <div>
+    <h1>Thai Farm AI Generator</h1>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / Imagen 3</p>
+  </div>
+  <span class="free-badge">✨ OpenAI · Gemini</span>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar">
+
+    <!-- Provider selector + API keys -->
+    <div style="background:#1a2010;border:1px solid #3a5a22;border-radius:9px;padding:13px;display:flex;flex-direction:column;gap:10px">
+      <div class="sec-label">⚡ เลือก AI Model</div>
+
+      <!-- Toggle -->
+      <div style="display:flex;gap:6px">
+        <button id="btnOpenAI" onclick="setProvider('openai')"
+          style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #6ab04c;background:#243020;color:#b8e090">
+          DALL-E 3
+        </button>
+        <button id="btnGemini" onclick="setProvider('gemini')"
+          style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
+          Imagen 3
+        </button>
+      </div>
+
+      <!-- OpenAI key -->
+      <div id="panelOpenAI">
+        <div style="font-size:10px;color:#78a050;margin-bottom:5px">OpenAI API Key</div>
+        <div style="display:flex;gap:7px">
+          <input type="password" id="openaiKey" placeholder="sk-..."
+            style="flex:1;background:#13150f;border:1px solid #333;border-radius:6px;padding:7px 9px;color:#e0dcc8;font-size:12px;font-family:monospace" />
+          <button onclick="saveKey('openai')"
+            style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
+        </div>
+        <div id="statusOpenAI" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Key</div>
+        <div style="font-size:10px;color:#445533;margin-top:4px">~$0.04/ภาพ • คุณภาพสูงสุด</div>
+      </div>
+
+      <!-- Gemini key -->
+      <div id="panelGemini" style="display:none">
+        <div style="font-size:10px;color:#78a050;margin-bottom:5px">Gemini API Key</div>
+        <div style="display:flex;gap:7px">
+          <input type="password" id="geminiKey" placeholder="AIza..."
+            style="flex:1;background:#13150f;border:1px solid #333;border-radius:6px;padding:7px 9px;color:#e0dcc8;font-size:12px;font-family:monospace" />
+          <button onclick="saveKey('gemini')"
+            style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
+        </div>
+        <div id="statusGemini" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Key</div>
+        <div style="font-size:10px;color:#445533;margin-top:4px">ฟรี 15 ภาพ/นาที • Imagen 3</div>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div>
+      <div class="sec-label">🌿 ธีม</div>
+      <div class="theme-grid">
+        <button class="tbtn active" onclick="setTheme(this,'garden')">
+          <span class="ic">🥬</span><span class="nm">สวนผักแปลงเกษตร</span><span class="sub">Raised beds, บ่อปลา</span>
+        </button>
+        <button class="tbtn" onclick="setTheme(this,'house')">
+          <span class="ic">🏡</span><span class="nm">บ้านชนบทริมนา</span><span class="sub">เรือนไทย, ทุ่งข้าว</span>
+        </button>
+        <button class="tbtn" onclick="setTheme(this,'kitchen')">
+          <span class="ic">🍳</span><span class="nm">ครัวไทยโบราณ</span><span class="sub">กระทะดิน, ผักสด</span>
+        </button>
+        <button class="tbtn" onclick="setTheme(this,'rice')">
+          <span class="ic">🌾</span><span class="nm">ทุ่งนา/ดำนา</span><span class="sub">ควาย, หมอกเช้า</span>
+        </button>
+        <button class="tbtn" onclick="setTheme(this,'river')">
+          <span class="ic">🛶</span><span class="nm">ริมน้ำ/คลอง</span><span class="sub">สวนริมคลอง, เรือ</span>
+        </button>
+        <button class="tbtn" onclick="setTheme(this,'aerial')">
+          <span class="ic">🚁</span><span class="nm">มุมสูง Drone</span><span class="sub">Bird's eye view</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Format -->
+    <div>
+      <div class="sec-label">📐 Format โซเชียล</div>
+      <div class="fmt-row">
+        <button class="fbtn sq active" onclick="setFmt(this,1024,1024)">
+          <span class="fbox"></span><span>Feed 1:1</span>
+        </button>
+        <button class="fbtn port" onclick="setFmt(this,768,1344)">
+          <span class="fbox"></span><span>Story/Reels</span>
+        </button>
+        <button class="fbtn land" onclick="setFmt(this,1344,768)">
+          <span class="fbox"></span><span>Landscape</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mood -->
+    <div>
+      <div class="sec-label">🌤 บรรยากาศ</div>
+      <div class="mood-wrap">
+        <span class="mtag active" onclick="toggleMood(this,'golden hour warm sunset light')">🌅 Golden Hour</span>
+        <span class="mtag" onclick="toggleMood(this,'morning mist soft fog')">🌫 หมอกเช้า</span>
+        <span class="mtag" onclick="toggleMood(this,'cinematic dramatic sky')">🎬 Cinematic</span>
+        <span class="mtag" onclick="toggleMood(this,'bright sunny vibrant')">☀️ สดใส</span>
+        <span class="mtag" onclick="toggleMood(this,'lush green after rain fresh')">🌧 หลังฝน</span>
+        <span class="mtag" onclick="toggleMood(this,'blue hour twilight peaceful')">🌙 ยามเย็น</span>
+      </div>
+    </div>
+
+    <!-- Prompt -->
+    <div>
+      <div class="sec-label">✍️ Prompt</div>
+      <textarea id="pt"></textarea>
+      <div class="row">
+        <button class="btn-s" onclick="build()">🔄 สร้างใหม่</button>
+        <button class="btn-s" onclick="copyPt()">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- Count -->
+    <div>
+      <div class="sec-label">🔢 จำนวนภาพ</div>
+      <div class="count-row">
+        <label>จำนวน</label>
+        <input type="range" min="1" max="6" value="1" id="cnt"
+               oninput="document.getElementById('cv').textContent=this.value" />
+        <span class="count-val" id="cv">1</span>
+      </div>
+    </div>
+
+    <button class="btn-gen" id="genBtn" onclick="generate()">✨ Generate ภาพ</button>
+
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="mainArea">
+    <div class="empty" id="emptyEl">
+      <span class="ico">🌾</span>
+      <h2>พร้อม Generate!</h2>
+      <p>เลือกธีมและบรรยากาศ<br/>แล้วกด <span class="free">Generate ภาพ</span><br/><br/>
+      <span style="font-size:12px;color:#555">ใส่ HF Token แล้วกด Generate<br/>ฟรี • FLUX.1-schnell</span></p>
+    </div>
+  </main>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const THEMES = {
+  garden:  'A beautiful Thai organic vegetable garden, neatly arranged raised wooden planting beds filled with lush green vegetables, a serene lotus fish pond in the center, bamboo fences, banana and coconut trees, rustic wooden farmhouse in background, misty green mountains, hyperrealistic photographic quality',
+  house:   'A picturesque traditional Thai wooden stilt house surrounded by lush green rice paddies, vegetable garden with crop rows, coconut and banana trees, peaceful canal nearby, warm tropical landscape, locals in daily life, cinematic aerial perspective, photorealistic',
+  kitchen: 'Authentic Thai countryside outdoor kitchen under rustic wooden shelter, woman cooking over traditional clay stove, fresh tropical vegetables on wooden table, lemongrass chilies kaffir lime eggplants, lush green garden in background, natural soft light, photorealistic documentary style',
+  rice:    'Thai farmers transplanting rice seedlings in flooded paddy field at sunrise, water buffalo plowing earth, traditional bamboo huts with rising smoke, misty mountains in distance, golden warm light, cinematic landscape, ultra-realistic photography',
+  river:   'Aerial view of Thai riverside vegetable farms along winding tropical canal, traditional wooden longboats moored at bank, coconut palms lining waterway, vibrant green crop rows, farmers working, golden sunset light on water, photorealistic bird\'s eye view',
+  aerial:  'Drone aerial view of stunning Thai organic farm, symmetrical raised vegetable beds in grid pattern, central koi pond with lotus flowers, bamboo pathways, chickens roaming, traditional teak farmhouse, surrounded by lush tropical forest and distant mountains, ultra-sharp photorealistic'
+};
+
+const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
+
+let theme = 'garden', w = 1024, h = 1024;
+let moods = new Set(['golden hour warm sunset light']);
+let total = 0;
+let provider = 'openai';
+
+window.onload = () => {
+  const p = localStorage.getItem('provider') || 'openai';
+  setProvider(p);
+  const ok = localStorage.getItem('openai_key');
+  const gk = localStorage.getItem('gemini_key');
+  if (ok) { document.getElementById('openaiKey').value = ok; markSaved('openai'); }
+  if (gk) { document.getElementById('geminiKey').value = gk; markSaved('gemini'); }
+  build();
+};
+
+function setProvider(p) {
+  provider = p;
+  localStorage.setItem('provider', p);
+  document.getElementById('panelOpenAI').style.display = p === 'openai' ? 'block' : 'none';
+  document.getElementById('panelGemini').style.display  = p === 'gemini'  ? 'block' : 'none';
+  const btnOAI = document.getElementById('btnOpenAI');
+  const btnGem = document.getElementById('btnGemini');
+  if (p === 'openai') {
+    btnOAI.style.cssText += 'border-color:#6ab04c;background:#243020;color:#b8e090';
+    btnGem.style.cssText += 'border-color:#333;background:#1e201a;color:#777';
+  } else {
+    btnGem.style.cssText += 'border-color:#6ab04c;background:#243020;color:#b8e090';
+    btnOAI.style.cssText += 'border-color:#333;background:#1e201a;color:#777';
+  }
+}
+
+function saveKey(p) {
+  const val = document.getElementById(p === 'openai' ? 'openaiKey' : 'geminiKey').value.trim();
+  if (!val) { toast('❌ กรุณาใส่ Key'); return; }
+  localStorage.setItem(p === 'openai' ? 'openai_key' : 'gemini_key', val);
+  markSaved(p);
+  toast('✅ บันทึก Key แล้ว');
+}
+
+function markSaved(p) {
+  const el = document.getElementById(p === 'openai' ? 'statusOpenAI' : 'statusGemini');
+  el.textContent = '✓ มี Key แล้ว';
+  el.style.color = '#6ab04c';
+}
+
+function setTheme(btn, t) {
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  theme = t;
+  build();
+}
+
+function setFmt(btn, nw, nh) {
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  w = nw; h = nh;
+}
+
+function toggleMood(el, m) {
+  moods.has(m) ? (moods.delete(m), el.classList.remove('active'))
+               : (moods.add(m),    el.classList.add('active'));
+  build();
+}
+
+function build() {
+  const mood = [...moods].join(', ');
+  const add  = `${mood ? mood + ', ' : ''}professional photography, high resolution, vibrant colors, Thai countryside aesthetic, Southeast Asia`;
+  document.getElementById('pt').value = THEMES[theme] + '. ' + add;
+}
+
+function copyPt() {
+  navigator.clipboard.writeText(document.getElementById('pt').value)
+    .then(() => toast('📋 Copy แล้ว!'));
+}
+
+async function generate() {
+  const keyName = provider === 'openai' ? 'openai_key' : 'gemini_key';
+  const apiKey  = localStorage.getItem(keyName);
+  if (!apiKey) { toast('❌ กรุณาใส่ API Key ก่อน'); return; }
+
+  const prompt = document.getElementById('pt').value.trim();
+  const count  = parseInt(document.getElementById('cnt').value);
+  const btn    = document.getElementById('genBtn');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลัง Generate...';
+
+  // Remove empty state
+  document.getElementById('emptyEl')?.remove();
+
+  // Ensure topbar + grid
+  let grid = document.getElementById('grid');
+  if (!grid) {
+    const bar = document.createElement('div');
+    bar.className = 'topbar';
+    bar.id = 'topbar';
+    bar.innerHTML = `<h2>ภาพที่สร้าง</h2>
+      <div class="right">
+        <span class="badge" id="badge">0 ภาพ</span>
+        <button class="btn-clear" onclick="clearAll()">ล้างทั้งหมด</button>
+      </div>`;
+    document.getElementById('mainArea').appendChild(bar);
+
+    grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.id = 'grid';
+    document.getElementById('mainArea').appendChild(grid);
+  }
+
+  // Create placeholder cards
+  const ids = [];
+  for (let i = 0; i < count; i++) {
+    const id = 'c' + Date.now() + i;
+    ids.push(id);
+
+    const ratio = h / w;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = id;
+    card.innerHTML = `
+      <div class="card-img" style="padding-top:${ratio*100}%">
+        <div class="overlay">
+          <div class="spinner"></div>
+          <span class="ld-text">กำลังสร้างภาพ...</span>
+        </div>
+      </div>
+      <div class="card-foot">
+        <span class="card-name">⏳ ${NAMES[theme]}</span>
+      </div>`;
+    grid.prepend(card);
+  }
+
+  for (let i = 0; i < count; i++) {
+    const card = document.getElementById(ids[i]);
+    if (!card) continue;
+
+    try {
+      let blobUrl;
+
+      if (provider === 'openai') {
+        // DALL-E 3
+        const dalleSize = (w === h) ? '1024x1024' : (w > h ? '1792x1024' : '1024x1792');
+        const resp = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size: dalleSize, response_format: 'b64_json' })
+        });
+        const data = await resp.json();
+        if (data.error) throw new Error(data.error.message);
+        const byteArr = Uint8Array.from(atob(data.data[0].b64_json), c => c.charCodeAt(0));
+        blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
+
+      } else {
+        // Imagen 3 via Gemini API
+        const resp = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=' + apiKey,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              instances: [{ prompt }],
+              parameters: { sampleCount: 1, aspectRatio: w === h ? '1:1' : (w > h ? '16:9' : '9:16') }
+            })
+          }
+        );
+        const data = await resp.json();
+        if (data.error) throw new Error(data.error.message);
+        const b64 = data.predictions[0].bytesBase64Encoded;
+        const byteArr = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
+      }
+
+      card.querySelector('.card-img').innerHTML = '';
+      const imgEl = document.createElement('img');
+      imgEl.src = blobUrl;
+      imgEl.alt = NAMES[theme];
+      imgEl.style.cssText = 'width:100%;display:block;';
+      card.querySelector('.card-img').appendChild(imgEl);
+      const ts = Date.now();
+      card.querySelector('.card-foot').innerHTML = `
+        <span class="card-name">✅ ${NAMES[theme]}</span>
+        <button class="cbtn" onclick="dlBlob('${blobUrl}','thai-farm-${ts}.png')">💾 บันทึก</button>
+        <button class="cbtn" onclick="openNew('${blobUrl}')">🔗 เปิด</button>`;
+      total++;
+      const badge = document.getElementById('badge');
+      if (badge) badge.textContent = total + ' ภาพ';
+      toast('✅ ภาพ ' + (i+1) + '/' + count + ' สำเร็จ!');
+
+    } catch(e) {
+      card.querySelector('.card-img').innerHTML =
+        `<div class="overlay"><span style="color:#e08080;font-size:12px;padding:16px;text-align:center">❌ ${e.message.slice(0,100)}</span></div>`;
+      card.querySelector('.card-foot').innerHTML =
+        `<span class="card-name" style="color:#c07070">Error</span>`;
+      toast('❌ ' + e.message.slice(0, 60));
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✨ Generate ภาพ';
+}
+
+function dlBlob(blobUrl, name) {
+  const a = document.createElement('a');
+  a.href = blobUrl; a.download = name;
+  a.click();
+  toast('💾 บันทึกแล้ว!');
+}
+
+function openNew(url) { window.open(url, '_blank'); }
+
+function clearAll() {
+  if (!confirm('ลบภาพทั้งหมดใช่ไหม?')) return;
+  total = 0;
+  document.getElementById('grid')?.remove();
+  document.getElementById('topbar')?.remove();
+  const main = document.getElementById('mainArea');
+  const el = document.createElement('div');
+  el.className = 'empty'; el.id = 'emptyEl';
+  el.innerHTML = `<span class="ico">🌾</span><h2>พร้อม Generate!</h2>
+    <p>เลือกธีมและบรรยากาศ แล้วกด <span class="free">Generate ภาพ</span><br/><br/>
+    <span style="font-size:12px;color:#555">ใส่ HF Token แล้วกด Generate • FLUX.1-schnell</span></p>`;
+  main.appendChild(el);
+  toast('🗑 ล้างแล้ว');
+}
+
+let tt;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
