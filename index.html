@@ -282,7 +282,7 @@
   <span style="font-size:24px">🌾</span>
   <div>
     <h1>Thai Farm AI Generator</h1>
-    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • FLUX 1.1 Pro / Nano Banana 2</p>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • Google Nano Banana Pro / Phaya</p>
   </div>
   <span class="free-badge">✨ Replicate · Phaya</span>
 </header>
@@ -299,7 +299,7 @@
       <div style="display:flex;gap:6px">
         <button id="btnOpenAI" onclick="setProvider('openai')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #6ab04c;background:#243020;color:#b8e090">
-          FLUX 1.1 Pro
+          Nano Banana Pro
         </button>
         <button id="btnGemini" onclick="setProvider('gemini')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
@@ -317,7 +317,7 @@
             style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
         </div>
         <div id="statusOpenAI" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Key</div>
-        <div style="font-size:10px;color:#445533;margin-top:4px">~$0.025/ภาพ • Photorealistic สูง</div>
+        <div style="font-size:10px;color:#445533;margin-top:4px">Google Nano Banana Pro • 2K • Replicate</div>
       </div>
 
       <!-- Phaya / Nano Banana 2 key -->
@@ -584,16 +584,17 @@ async function generate() {
       let blobUrl;
 
       if (provider === 'openai') {
-        // FLUX.1-dev via Replicate
-        const fluxUrl = 'https://api.replicate.com/v1/models/black-forest-labs/flux-1.1-pro/predictions';
-        const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(fluxUrl), {
+        // Google Nano Banana Pro via Replicate
+        const nanoUrl = 'https://api.replicate.com/v1/models/google/nano-banana-pro/predictions';
+        const nanoAr = ar === '4:5' ? '4:5' : ar === '9:16' ? '9:16' : ar === '16:9' ? '16:9' : '1:1';
+        const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(nanoUrl), {
           method: 'POST',
           headers: {
             'Authorization': 'Token ' + apiKey,
             'Content-Type': 'application/json',
             'Prefer': 'wait'
           },
-          body: JSON.stringify({ input: { prompt, width: w, height: h, output_format: 'jpg', output_quality: 95, prompt_upsampling: false } })
+          body: JSON.stringify({ input: { prompt, aspect_ratio: nanoAr, resolution: '2K' } })
         });
         const data = await resp.json();
         if (data.detail || data.error) throw new Error(data.detail || data.error);
