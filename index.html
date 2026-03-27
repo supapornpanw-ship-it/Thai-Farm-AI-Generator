@@ -282,7 +282,7 @@
   <span style="font-size:24px">🌾</span>
   <div>
     <h1>Thai Farm AI Generator</h1>
-    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / FLUX.1</p>
+    <p>สร้างภาพ Content วิถีชีวิตเกษตรไทย • DALL-E 3 / FLUX (ฟรี)</p>
   </div>
   <span class="free-badge">✨ OpenAI · Gemini</span>
 </header>
@@ -303,7 +303,7 @@
         </button>
         <button id="btnGemini" onclick="setProvider('gemini')"
           style="flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #333;background:#1e201a;color:#777">
-          HuggingFace
+          FLUX (ฟรี)
         </button>
       </div>
 
@@ -320,17 +320,13 @@
         <div style="font-size:10px;color:#445533;margin-top:4px">~$0.04/ภาพ • คุณภาพสูงสุด</div>
       </div>
 
-      <!-- HuggingFace key -->
+      <!-- FLUX free panel -->
       <div id="panelGemini" style="display:none">
-        <div style="font-size:10px;color:#78a050;margin-bottom:5px">HuggingFace Token</div>
-        <div style="display:flex;gap:7px">
-          <input type="password" id="geminiKey" placeholder="hf_..."
-            style="flex:1;background:#13150f;border:1px solid #333;border-radius:6px;padding:7px 9px;color:#e0dcc8;font-size:12px;font-family:monospace" />
-          <button onclick="saveKey('gemini')"
-            style="background:#2d4a1a;border:1px solid #6ab04c;border-radius:6px;color:#b8e090;padding:7px 11px;font-size:11px;cursor:pointer">บันทึก</button>
+        <div style="background:#1a2a10;border:1px solid #4a7c2a;border-radius:7px;padding:10px;text-align:center">
+          <div style="font-size:18px;margin-bottom:4px">⚡</div>
+          <div style="font-size:12px;color:#b8e090;font-weight:600">ไม่ต้องใส่ Key!</div>
+          <div style="font-size:10px;color:#78a050;margin-top:4px">ใช้ Pollinations.ai FLUX<br/>ฟรี 100% ไม่จำกัด</div>
         </div>
-        <div id="statusGemini" style="font-size:10px;color:#556644;margin-top:5px">ยังไม่ได้ใส่ Token</div>
-        <div style="font-size:10px;color:#445533;margin-top:4px">ฟรี • huggingface.co/settings/tokens</div>
       </div>
     </div>
 
@@ -520,9 +516,9 @@ function copyPt() {
 }
 
 async function generate() {
-  const keyName = provider === 'openai' ? 'openai_key' : 'gemini_key';
-  const apiKey  = localStorage.getItem(keyName);
-  if (!apiKey) { toast('❌ กรุณาใส่ API Key ก่อน'); return; }
+  const keyName = provider === 'openai' ? 'openai_key' : null;
+  const apiKey  = keyName ? localStorage.getItem(keyName) : 'free';
+  if (!apiKey) { toast('❌ กรุณาใส่ OpenAI API Key ก่อน'); return; }
 
   const prompt = document.getElementById('pt').value.trim();
   const count  = parseInt(document.getElementById('cnt').value);
@@ -597,24 +593,20 @@ async function generate() {
         blobUrl = URL.createObjectURL(new Blob([byteArr], { type: 'image/png' }));
 
       } else {
-        // HuggingFace FLUX.1-schnell (free)
-        const resp = await fetch(
-          'https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell',
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer ' + apiKey,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ inputs: prompt })
-          }
-        );
-        if (!resp.ok) {
-          const err = await resp.json().catch(() => ({}));
-          throw new Error(err.error || `HuggingFace error ${resp.status}`);
-        }
-        const blob = await resp.blob();
-        blobUrl = URL.createObjectURL(blob);
+        // Pollinations.ai FLUX — ฟรี ไม่ต้องใช้ key
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&model=flux&nologo=true&seed=${Date.now()}`;
+        blobUrl = await new Promise((res, rej) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth; c.height = img.naturalHeight;
+            c.getContext('2d').drawImage(img, 0, 0);
+            c.toBlob(b => res(URL.createObjectURL(b)), 'image/jpeg', 0.95);
+          };
+          img.onerror = () => rej(new Error('โหลดภาพไม่ได้ — ลองใหม่อีกครั้ง'));
+          img.src = imgUrl;
+        });
       }
 
       card.querySelector('.card-img').innerHTML = '';
