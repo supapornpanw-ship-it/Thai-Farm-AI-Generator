@@ -675,16 +675,74 @@ async function generate() {
       toast('✅ ภาพ ' + (i+1) + '/' + count + ' สำเร็จ!');
 
     } catch(e) {
+      const errMsg = e.message.slice(0,120);
       card.querySelector('.card-img').innerHTML =
-        `<div class="overlay"><span style="color:#e08080;font-size:12px;padding:16px;text-align:center">❌ ${e.message.slice(0,100)}</span></div>`;
+        `<div class="overlay"><span style="color:#e08080;font-size:12px;padding:16px;text-align:center">❌ ${errMsg}</span></div>`;
       card.querySelector('.card-foot').innerHTML =
-        `<span class="card-name" style="color:#c07070">Error</span>`;
+        `<span class="card-name" style="color:#c07070">Error</span>
+         <button class="cbtn" style="background:#3a2020;border-color:#8b4040;color:#e09090"
+           onclick="retryCard('${ids[i]}','${prompt.replace(/'/g,"\\'")}')">🔄 ลองใหม่</button>`;
       toast('❌ ' + e.message.slice(0, 60));
     }
   }
 
   btn.disabled = false;
   btn.textContent = '✨ Generate ภาพ';
+}
+
+async function retryCard(cardId, retryPrompt) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  const ratio = h / w;
+  card.querySelector('.card-img').innerHTML = `
+    <div class="overlay">
+      <div class="spinner"></div>
+      <span class="ld-text">กำลังสร้างภาพ...</span>
+    </div>`;
+  card.querySelector('.card-foot').innerHTML = `<span class="card-name">⏳ กำลังลองใหม่...</span>`;
+  const apiKey = localStorage.getItem('gemini_key');
+  if (!apiKey) { toast('❌ ไม่มี Phaya API Key'); return; }
+  try {
+    const phayaUrl = 'https://api.phaya.io/api/v1/nano-banana/create';
+    const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(phayaUrl), {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: retryPrompt, aspect_ratio: ar, resolution: '1K', output_format: 'jpg' })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.message || 'Phaya error');
+    const taskId = data.task_id; const jobId = data.job_id;
+    const ldEl = card.querySelector('.ld-text');
+    let imgUrl = null, lastPollData = null;
+    const pollEndpoints = [taskId && 'https://api.phaya.io/api/v1/tasks/'+taskId, jobId && 'https://api.phaya.io/api/v1/jobs/'+jobId].filter(Boolean);
+    for (let att = 0; att < 60 && !imgUrl; att++) {
+      await new Promise(r => setTimeout(r, 5000));
+      if (ldEl) ldEl.textContent = `รอ ${(att+1)*5}s...`;
+      for (const u of pollEndpoints) {
+        const pr = await fetch('https://corsproxy.io/?'+encodeURIComponent(u),{headers:{'Authorization':'Bearer '+apiKey}});
+        lastPollData = await pr.json();
+        const s = lastPollData.status||lastPollData.state;
+        if (s==='completed'||s==='done'||s==='success'||s==='finished') {
+          imgUrl = lastPollData.image_url||lastPollData.url||lastPollData.output||lastPollData.result||lastPollData.data?.[0]?.url||lastPollData.images?.[0]?.url||lastPollData.images?.[0];
+          if (imgUrl) break;
+        } else if (s==='failed'||s==='error') throw new Error('Phaya job failed');
+      }
+    }
+    if (!imgUrl) throw new Error('Poll: '+JSON.stringify(lastPollData).slice(0,150));
+    card.querySelector('.card-img').innerHTML = '';
+    const imgEl = document.createElement('img');
+    imgEl.src = imgUrl; imgEl.style.cssText = 'width:100%;display:block;';
+    card.querySelector('.card-img').appendChild(imgEl);
+    const ts = Date.now();
+    card.querySelector('.card-foot').innerHTML = `
+      <span class="card-name">✅ สำเร็จ</span>
+      <button class="cbtn" onclick="dlBlob('${imgUrl}','thai-farm-${ts}.jpg')">💾 บันทึก</button>
+      <button class="cbtn" onclick="openNew('${imgUrl}')">🔗 เปิด</button>`;
+    toast('✅ ลองใหม่สำเร็จ!');
+  } catch(e) {
+    card.querySelector('.card-img').innerHTML = `<div class="overlay"><span style="color:#e08080;font-size:12px;padding:16px;text-align:center">❌ ${e.message.slice(0,100)}</span></div>`;
+    card.querySelector('.card-foot').innerHTML = `<span class="card-name" style="color:#c07070">Error</span><button class="cbtn" style="background:#3a2020;border-color:#8b4040;color:#e09090" onclick="retryCard('${cardId}','${retryPrompt.replace(/'/g,"\\'")}')">🔄 ลองใหม่</button>`;
+  }
 }
 
 function dlBlob(blobUrl, name) {
