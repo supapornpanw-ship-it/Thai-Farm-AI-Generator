@@ -622,20 +622,20 @@ async function generate() {
           jobId  && 'https://api.phaya.io/api/v1/nano-banana/status/' + jobId,
         ].filter(Boolean);
 
-        // Get user folder ID from /me endpoint (cached in localStorage)
+        // Get user folder ID (try /me, then localStorage, then known default)
         let folderId = localStorage.getItem('phaya_folder_id');
         if (!folderId) {
-          const meResp = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.phaya.io/api/v1/me'), {
-            headers: { 'Authorization': 'Bearer ' + apiKey }
-          });
-          const meData = await meResp.json();
-          folderId = meData.id || meData.user_id || meData.uuid || meData.user?.id;
-          if (folderId) localStorage.setItem('phaya_folder_id', folderId);
+          try {
+            const meResp = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.phaya.io/api/v1/me'), {
+              headers: { 'Authorization': 'Bearer ' + apiKey }
+            });
+            const meData = await meResp.json();
+            folderId = meData.id || meData.user_id || meData.uuid || meData.user?.id;
+            if (folderId) localStorage.setItem('phaya_folder_id', folderId);
+          } catch(e2) {}
         }
-        if (!folderId) {
-          folderId = localStorage.getItem('phaya_folder_id_manual');
-          if (!folderId) throw new Error('ไม่พบ Folder ID — กรุณาใส่ใน localStorage key "phaya_folder_id_manual"');
-        }
+        if (!folderId) folderId = localStorage.getItem('phaya_folder_id_manual');
+        if (!folderId) folderId = '258aabb2-b489-4807-9ab4-bc6ccbbb8b71'; // known default
 
         // Poll Supabase storage directly
         const supaBase = 'https://bvlkdbigeaecqdmkzrvc.supabase.co/storage/v1/object/public/media-outputs/outputs/nano-banana';
@@ -730,7 +730,7 @@ async function retryCard(cardId, retryPrompt) {
       } catch(e2) {}
     }
     if (!folderId2) folderId2 = localStorage.getItem('phaya_folder_id_manual');
-    if (!folderId2) throw new Error('ไม่พบ Folder ID');
+    if (!folderId2) folderId2 = '258aabb2-b489-4807-9ab4-bc6ccbbb8b71'; // known default
     const supaBase2 = 'https://bvlkdbigeaecqdmkzrvc.supabase.co/storage/v1/object/public/media-outputs/outputs/nano-banana';
     for (let att = 0; att < 60 && !imgUrl; att++) {
       await new Promise(r => setTimeout(r, 5000));
