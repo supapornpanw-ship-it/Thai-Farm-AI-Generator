@@ -606,8 +606,11 @@ async function generate() {
         });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.message || data.error || `Phaya error ${resp.status}`);
-        const imgUrl = data.image_url || data.url || data.data?.[0]?.url || data.result;
-        if (!imgUrl) throw new Error('ไม่ได้รับ URL ภาพจาก Phaya');
+        console.log('Phaya response:', JSON.stringify(data));
+        const imgUrl = data.image_url || data.url || data.output || data.result
+          || data.data?.[0]?.url || data.images?.[0] || data.images?.[0]?.url
+          || (typeof data === 'string' ? data : null);
+        if (!imgUrl) throw new Error('Response: ' + JSON.stringify(data).slice(0, 200));
         blobUrl = await new Promise((res, rej) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
