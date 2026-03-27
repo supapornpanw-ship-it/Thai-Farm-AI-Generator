@@ -431,13 +431,15 @@
 <div id="toast"></div>
 
 <script>
+const PHOTO_BASE = 'RAW photo, shot on Sony A7R IV, 24mm f/2.8 lens, natural light, photojournalism documentary style, real photograph, no painting, no illustration, no digital art, no CGI, no rendering, hyperrealistic, true-to-life colors, film grain texture, shallow depth of field';
+
 const THEMES = {
-  garden:  'Beautiful Thai organic vegetable garden, neatly arranged raised wooden planting beds filled with lush green vegetables, serene lotus pond in center, bamboo fences, banana and coconut trees, rustic wooden farmhouse in background, misty green mountains, golden hour light, photorealistic landscape photography, ultra high resolution',
-  house:   'Traditional Thai wooden stilt house surrounded by lush green rice paddies, vegetable garden with neat crop rows, coconut and banana trees, peaceful canal nearby, warm tropical landscape, cinematic aerial perspective, golden hour sunset, photorealistic',
-  kitchen: 'Authentic Thai countryside outdoor kitchen under rustic wooden shelter, clay cooking stove with fire, colorful fresh tropical vegetables on wooden table, lemongrass chili kaffir lime eggplants basil, lush green garden background, warm natural soft light, photorealistic food photography style',
-  rice:    'Vast flooded Thai rice paddy field at sunrise, water buffalo near traditional bamboo huts, morning mist over mountains in distance, golden warm light reflecting on water surface, cinematic wide landscape, ultra-realistic photography, no people',
-  river:   'Aerial view of Thai riverside vegetable farms along winding tropical canal, traditional wooden longboats moored at bank, coconut palms lining waterway, vibrant green crop rows, golden sunset light shimmering on water, photorealistic bird\'s eye view drone shot',
-  aerial:  'Drone aerial view of stunning Thai organic farm, symmetrical raised vegetable beds in grid pattern, central koi pond with lotus flowers, bamboo pathways, traditional teak farmhouse, surrounded by lush tropical forest and distant misty mountains, ultra-sharp photorealistic'
+  garden:  'Real photograph of a Thai organic vegetable garden, neatly arranged raised wooden planting beds filled with lush green vegetables, lotus pond, bamboo fences, banana trees, rustic wooden farmhouse in background, misty mountains, Thailand',
+  house:   'Real photograph of a traditional Thai wooden stilt house surrounded by rice paddies, vegetable garden, coconut trees, peaceful canal, warm afternoon light, rural Thailand countryside',
+  kitchen: 'Real photograph of a Thai countryside outdoor kitchen under wooden shelter, clay stove, fresh tropical vegetables on wooden table, lemongrass chili kaffir lime eggplants, lush garden background, warm natural light',
+  rice:    'Real photograph of vast flooded Thai rice paddy field at sunrise, water buffalo, traditional bamboo huts, morning mist over limestone mountains, golden light reflecting on water, no people, rural Thailand',
+  river:   'Real aerial drone photograph of Thai riverside vegetable farms along tropical canal, wooden longboats, coconut palms, vibrant green crops, golden hour light on water surface, rural Thailand',
+  aerial:  'Real drone aerial photograph of Thai organic farm, raised vegetable beds in grid pattern, koi pond with lotus, bamboo paths, teak farmhouse, surrounded by tropical forest and misty mountains'
 };
 
 const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
@@ -508,7 +510,7 @@ function toggleMood(el, m) {
 
 function build() {
   const mood = [...moods].join(', ');
-  const add  = `${mood ? mood + ', ' : ''}professional photography, high resolution, vibrant colors, Thai countryside aesthetic, Southeast Asia`;
+  const add  = `${mood ? mood + ', ' : ''}${PHOTO_BASE}`;
   document.getElementById('pt').value = THEMES[theme] + '. ' + add;
 }
 
