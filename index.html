@@ -434,12 +434,45 @@
 const PHOTO_BASE = 'photorealistic photography, shot on Canon EOS R5 with 24-70mm f/2.8 lens, natural light, shallow depth of field, atmospheric haze, subtle lens flare, real textures and imperfections, cinematic color grading, professional nature photography';
 
 const THEMES = {
-  garden:  'aerial drone photograph of a circular Thai permaculture farm, radiating vegetable beds with morning glory spinach kale basil arranged like spokes of a wheel, central koi pond with colorful orange and white fish visible through clear water, weathered teak wood raised beds with dark fertile soil, single tin-roofed farmhouse with rust patches, surrounded by coconut palms and banana trees, rice paddies visible in background, morning golden light casting long shadows, Chiang Mai Thailand',
-  house:   'traditional Thai wooden stilt house (เรือนไทย) elevated on thick teak pillars, aged honey-brown wood planks with visible grain, decorative carved fascia boards, corrugated tin roof with green moss patches, surrounding garden of marigolds bougainvillea and jasmine, wooden ladder leading to entrance, coconut palms swaying overhead, lush green rice paddy stretching to horizon, warm late afternoon golden light, rural Suphan Buri Thailand',
-  kitchen: 'Thai countryside outdoor kitchen at sunrise, terracotta clay charcoal stove (เตาถ่าน) with glowing embers and wisps of white smoke, heavy black cast iron wok with steam rising, rough-hewn wooden prep table covered with fresh ingredients: lemongrass stalks red chilies purple eggplants kaffir lime leaves galangal, woven bamboo wall texture, banana tree leaves overhead filtering warm golden morning light, dew on green plants in background, Nakhon Pathom Thailand',
-  rice:    'vast terraced rice paddy fields cascading down hillside, luminous emerald green rice plants in flooded paddies reflecting dramatic purple-orange sunset clouds, single small bamboo farmers hut with thatched roof in middle distance, winding red dirt path cutting through terraces, morning mist lingering in valleys between hills, coconut palms silhouetted on ridgeline, atmospheric depth and haze, Chiang Rai northern Thailand highlands',
-  river:   'aerial drone shot of winding canal cutting through Thai countryside, mirror-smooth dark water reflecting orange sunset sky, tall slender coconut palms lining both banks casting long reflections, two narrow wooden longtail boats with visible outboard motors leaving V-shaped wake patterns, lush bright green rice paddies extending to distant mountains silhouetted against gradient sunset sky, warm golden-orange light, central Thailand',
-  aerial:  'high aerial drone view straight down over Thai organic farm, perfectly geometric circular garden with koi pond at center, radiating sections of different vegetables creating color patchwork of greens yellows purples, rust-stained tin roof farmhouse casting shadow, winding dirt paths between beds, large coconut palm canopy casting dappled shadows, flooded rice paddies visible beyond farm boundary reflecting blue sky, late afternoon light'
+  garden: [
+    'aerial drone photograph of a circular Thai permaculture farm, radiating vegetable beds with morning glory spinach kale basil arranged like spokes of a wheel, central koi pond with colorful orange and white fish visible through clear water, weathered teak wood raised beds with dark fertile soil, single tin-roofed farmhouse with rust patches, surrounded by coconut palms and banana trees, rice paddies visible in background, morning golden light casting long shadows, Chiang Mai Thailand',
+    'ground level view of Thai raised-bed vegetable garden, close-up of wooden planter boxes filled with basil holy basil Chinese kale and chili plants, terracotta pots along bamboo fence, red hibiscus flowers visible, old wooden house in soft background blur, dew drops on broad green leaves, overcast soft diffused morning light, Nonthaburi Thailand',
+    'bird\'s eye view of Thai aquaponics farm, rectangular grow beds filled with dense rows of vegetables above large fish tanks, tilapia visible in clear water, PVC pipe irrigation system, mesh shade cloth casting grid shadow, worker in wide-brim hat tending plants, surrounded by dense banana grove, noon overhead sun, Ratchaburi Thailand',
+    'Thai kitchen garden beside traditional wooden house, dense mixed planting of lemongrass kaffir lime turmeric galangal and bird\'s eye chili in terracotta and ceramic pots, clay water jar under banana tree, morning glory climbing bamboo trellis, soft diffused overcast light, Suphan Buri Thailand',
+    'low angle view through Thai organic vegetable farm rows, dense leafy green tunnels of Chinese cabbage and morning glory, drip irrigation lines running between rows, rich dark moist soil visible between plants, shallow depth of field blurring distant farmhouse, bright midday tropical light, Pathum Thani Thailand',
+    'small backyard homestead garden in Thai countryside, raised wooden beds with mixed vegetables, hand-painted signs labeling crops, spirit house shrine with offerings near entrance, marigold garlands hung on bamboo posts, banana trees and papaya in corners, red dirt path, warm golden evening light, Nakhon Si Thammarat Thailand',
+    'wide angle view of colorful Thai market garden, long parallel raised beds bursting with purple eggplants red tomatoes orange pumpkins and green herbs, lattice bamboo trellises with climbing beans and cucumbers, old pickup truck parked at field edge, workers sorting harvest in shade, harsh tropical noon sun with deep shadows, Kanchanaburi Thailand',
+  ],
+  house: [
+    'traditional Thai wooden stilt house (เรือนไทย) elevated on thick teak pillars, aged honey-brown wood planks with visible grain, decorative carved fascia boards, corrugated tin roof with green moss patches, surrounding garden of marigolds bougainvillea and jasmine, wooden ladder leading to entrance, coconut palms swaying overhead, lush green rice paddy stretching to horizon, warm late afternoon golden light, rural Suphan Buri Thailand',
+    'three-quarter angle view of Thai traditional house, wraparound veranda with carved wooden railings, potted orchids and ferns hanging from eaves, old rocking chair on porch, cats resting on wooden steps, chickens roaming below elevated floor, lush tropical garden surrounding, late afternoon dappled light through palm leaves, Ayutthaya Thailand',
+    'interior courtyard of Thai farmhouse compound, multiple traditional buildings connected by covered walkways, large clay water jars in shaded corners, spirit house with fresh flower offerings, swept dirt courtyard with old mango tree providing shade, grandmother sitting weaving on veranda, warm soft morning light, rural Ang Thong Thailand',
+    'wide establishing shot of Thai stilt house at dusk, warm orange-yellow light spilling from interior windows, smoke rising from outdoor kitchen below house, fireflies beginning to appear, tall coconut palms silhouetted against purple-pink sky, rice fields glowing with last light of day, Phitsanulok Thailand',
+  ],
+  kitchen: [
+    'Thai countryside outdoor kitchen at sunrise, terracotta clay charcoal stove (เตาถ่าน) with glowing embers and wisps of white smoke, heavy black cast iron wok with steam rising, rough-hewn wooden prep table covered with fresh ingredients: lemongrass stalks red chilies purple eggplants kaffir lime leaves galangal, woven bamboo wall texture, banana tree leaves overhead filtering warm golden morning light, dew on green plants in background, Nakhon Pathom Thailand',
+    'close-up of Thai outdoor cooking station, clay pot simmering on charcoal with steam tendrils, colorful fresh ingredients arranged on wooden board: shrimp paste tumeric peppercorns basil eggplants, mortar and pestle with curry paste, woven bamboo basket of fresh herbs, copper ladle, warm backlit golden hour light through banana leaves, Chiang Mai Thailand',
+    'wide angle Thai farm kitchen scene, large covered outdoor cooking area with multiple clay stoves burning, three large woks and clay pots in use, hanging dried herbs and chili bundles from bamboo ceiling beams, fresh vegetables piled on long wooden table, roosters walking freely on dirt floor, soft morning light, Roi Et northeast Thailand',
+    'evening outdoor kitchen under Thai traditional house, glowing charcoal fire illuminating scene with warm orange light, iron wok with sizzling vegetables, smoke curling upward, surrounding darkness with fireflies, clay pots and banana leaf wrapping on ground, Nakhon Ratchasima Thailand',
+  ],
+  rice: [
+    'vast terraced rice paddy fields cascading down hillside, luminous emerald green rice plants in flooded paddies reflecting dramatic purple-orange sunset clouds, single small bamboo farmers hut with thatched roof in middle distance, winding red dirt path cutting through terraces, morning mist lingering in valleys between hills, coconut palms silhouetted on ridgeline, atmospheric depth and haze, Chiang Rai northern Thailand highlands',
+    'ground level view across flooded Thai rice paddy at golden hour, shallow water surface perfectly reflecting orange clouds and coconut palms, individual rice seedlings standing in rows, water buffalo silhouette in far background, farmer\'s hat and tools left at paddy edge, warm low raking light, Phichit central Thailand',
+    'aerial view of Thai rice paddy patchwork, irregular shaped paddies in varying shades of green and gold at different growth stages, raised earthen dikes separating plots, thin irrigation channels catching blue sky reflection, small farmhouses with tin roofs scattered across landscape, midday Thailand',
+    'close-up of Thai rice plants at harvest time, heavy golden grain-laden stalks bending under weight, sharp focus on individual rice grains, out-of-focus field extending to horizon, farmer\'s hands partially visible at frame edge, late afternoon warm backlight making grains glow, Surin Thailand',
+  ],
+  river: [
+    'aerial drone shot of winding canal cutting through Thai countryside, mirror-smooth dark water reflecting orange sunset sky, tall slender coconut palms lining both banks casting long reflections, two narrow wooden longtail boats with visible outboard motors leaving V-shaped wake patterns, lush bright green rice paddies extending to distant mountains silhouetted against gradient sunset sky, warm golden-orange light, central Thailand',
+    'low aerial view of Thai floating market canal, wooden boats laden with tropical fruits and vegetables, vendors in wide brim hats navigating narrow waterway, green vegetation overhanging banks, reflections of colorful awnings in dark water, morning activity and mist, Amphawa Samut Songkhram Thailand',
+    'ground level riverside scene, old weathered wooden dock extending into calm brown river, traditional wooden boat tied to post, overhanging trees creating dappled shade, fishing nets drying on bamboo poles, mist on water surface, early morning blue-grey light, Chanthaburi Thailand',
+    'wide aerial view of Thai river delta farmland, geometric rice paddies and orchards divided by network of canals and waterways, longtail boats leaving white wakes, coconut palm groves casting long shadows, silver water channels catching afternoon light, Nakhon Pathom Thailand',
+  ],
+  aerial: [
+    'high aerial drone view straight down over Thai organic farm, perfectly geometric circular garden with koi pond at center, radiating sections of different vegetables creating color patchwork of greens yellows purples, rust-stained tin roof farmhouse casting shadow, winding dirt paths between beds, large coconut palm canopy casting dappled shadows, flooded rice paddies visible beyond farm boundary reflecting blue sky, late afternoon light',
+    'high altitude aerial photograph of Thai rural landscape, patchwork of green rice paddies and fruit orchards in varying shades, silver canals and river bends reflecting sky, red dirt roads connecting small villages with tin-roof clusters, forest patches on hillsides, late afternoon light from low angle casting long shadows across landscape, central Thailand plains',
+    'medium altitude drone view of Thai village, traditional wooden houses with tin roofs clustered around temple with golden spire, surrounded by rice paddies and banana groves, children visible as small figures in courtyard, old pickup truck on dirt road, lush tropical canopy casting dappled shadows, noon overhead light, rural Isan Thailand',
+    'steep aerial drone view of Thai terraced farm on hillside, concentric curved terrace lines carved into slope, different crops on each terrace level creating striped color pattern, single farmer tending plants, wooden irrigation channels running downhill, pine and teak forest above farm boundary, morning mist in valley below, Chiang Mai highlands',
+  ],
 };
 
 const NAMES = { garden:'สวนผักแปลงเกษตร', house:'บ้านชนบทริมนา', kitchen:'ครัวไทยโบราณ', rice:'ทุ่งนา/ดำนา', river:'ริมน้ำคลอง', aerial:'มุมสูง Drone' };
@@ -533,24 +566,35 @@ const DETAIL_VARS = [
   'large golden orb spider web between bamboo',
 ];
 
+let lastSceneIdx = 0;
+
+function pickScene(forceNew = false) {
+  const arr = THEMES[theme];
+  if (!Array.isArray(arr)) return arr;
+  if (!forceNew) { lastSceneIdx = 0; return arr[0]; }
+  // สุ่มที่ต่างจากอันที่แสดงอยู่
+  let idx;
+  do { idx = Math.floor(Math.random() * arr.length); } while (arr.length > 1 && idx === lastSceneIdx);
+  lastSceneIdx = idx;
+  return arr[idx];
+}
+
 function build(randomize = false) {
   const mood = [...moods].join(', ');
-  let base = THEMES[theme];
-  if (randomize) {
-    const a = ANGLE_VARS[Math.floor(Math.random() * ANGLE_VARS.length)];
-    const d = DETAIL_VARS[Math.floor(Math.random() * DETAIL_VARS.length)];
-    base += `, ${a}, ${d}`;
-  }
+  const scene = pickScene(randomize);
+  const d = randomize ? ', ' + DETAIL_VARS[Math.floor(Math.random() * DETAIL_VARS.length)] : '';
   const add = `${mood ? mood + ', ' : ''}${PHOTO_BASE}`;
-  document.getElementById('pt').value = base + '. ' + add;
+  document.getElementById('pt').value = scene + d + '. ' + add;
 }
 
 // สร้าง prompt ที่แตกต่างกันสำหรับแต่ละภาพเมื่อ count > 1
 function variedPrompt(base, idx) {
   if (idx === 0) return base;
-  const a = ANGLE_VARS[idx % ANGLE_VARS.length];
+  const arr = THEMES[theme];
+  // ภาพที่ 2,3,4... หยิบ scene ถัดไปจาก array (วนซ้ำ)
+  const scene = Array.isArray(arr) ? arr[(lastSceneIdx + idx) % arr.length] : base;
   const d = DETAIL_VARS[Math.floor(Math.random() * DETAIL_VARS.length)];
-  return base + `, ${a}, ${d}`;
+  return scene + ', ' + d;
 }
 
 function copyPt() {
